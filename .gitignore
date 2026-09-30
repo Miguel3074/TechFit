@@ -1,0 +1,5 @@
+.openai/
+.edge-preview/
+*.png
+Thumbs.db
+.DS_Store
