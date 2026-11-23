@@ -3,3 +3,6 @@
 *.png
 Thumbs.db
 .DS_Store
+.env
+node_modules/
+npm-debug.log*

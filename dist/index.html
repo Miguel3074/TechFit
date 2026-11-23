@@ -11,7 +11,12 @@
 </head>
 <body>
   <main class="app-shell">
-    <section class="login-screen" id="login-screen" aria-labelledby="login-title">
+    <section class="loading-screen" id="loading-screen">
+      <span class="brand-mark">T</span>
+      <strong>TechFit</strong>
+      <span>Carregando sua conta...</span>
+    </section>
+    <section class="login-screen hidden" id="login-screen" aria-labelledby="login-title">
       <div class="brand-lockup">
         <span class="brand-mark">T</span>
         <span>TechFit</span>
@@ -21,31 +26,34 @@
         <h1 id="login-title">Seu corpo também merece uma pausa.</h1>
         <p>Treinos de 5 a 10 minutos para aliviar tensões, recuperar o foco e terminar o dia melhor.</p>
       </div>
-      <form class="login-card" id="login-form">
-        <label for="user-name">Como podemos chamar você?</label>
-        <input id="user-name" name="name" type="text" value="Miguel" maxlength="24" required>
-        <fieldset>
-          <legend>Escolha um acesso de demonstração</legend>
-          <label class="role-option">
-            <input type="radio" name="plan" value="free" checked>
-            <span class="role-copy">
-              <strong>Plano gratuito</strong>
-              <small>Treinos essenciais e relatório semanal</small>
-            </span>
-            <span class="role-badge">FREE</span>
-          </label>
-          <label class="role-option">
-            <input type="radio" name="plan" value="premium">
-            <span class="role-copy">
-              <strong>Plano premium</strong>
-              <small>Catálogo completo e todos os relatórios</small>
-            </span>
-            <span class="role-badge premium">PRO</span>
-          </label>
-        </fieldset>
-        <button class="primary-button" type="submit">Entrar no TechFit</button>
-        <p class="storage-note">Seus registros ficam salvos neste dispositivo.</p>
-      </form>
+      <div class="auth-card">
+        <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+          <button class="active" type="button" data-auth-view="login" role="tab" aria-selected="true">Entrar</button>
+          <button type="button" data-auth-view="register" role="tab" aria-selected="false">Criar conta</button>
+        </div>
+        <form class="auth-form" id="login-form">
+          <label for="login-email">E-mail</label>
+          <input id="login-email" name="email" type="email" autocomplete="email" placeholder="voce@email.com" required>
+          <label for="login-password">Senha</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" required>
+          <button class="primary-button" type="submit">Entrar no TechFit</button>
+        </form>
+        <form class="auth-form hidden" id="register-form">
+          <label for="register-name">Nome</label>
+          <input id="register-name" name="name" type="text" maxlength="60" autocomplete="name" placeholder="Seu nome" required>
+          <label for="register-email">E-mail</label>
+          <input id="register-email" name="email" type="email" autocomplete="email" placeholder="voce@email.com" required>
+          <label for="register-password">Senha</label>
+          <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo de 8 caracteres" required>
+          <button class="primary-button" type="submit">Criar conta gratuita</button>
+        </form>
+        <p class="auth-error hidden" id="auth-error" role="alert"></p>
+        <div class="demo-access">
+          <div><strong>Acesso para apresentação</strong><span>Conta Premium com histórico preenchido</span></div>
+          <button type="button" id="fill-demo-login">Usar conta demo</button>
+        </div>
+        <p class="storage-note">Sua conta e seu progresso são armazenados no MongoDB.</p>
+      </div>
     </section>
 
     <section class="app-screen hidden" id="app-screen">
@@ -84,14 +92,14 @@
               </span>
             </div>
             <div class="hero-content">
-              <span class="eyebrow dark">Pausa recomendada</span>
-              <h3>Destrave as costas</h3>
-              <p>Uma sequência leve para aliviar a lombar depois de muito tempo sentado.</p>
+              <span class="eyebrow dark" id="recommendation-label">Pausa recomendada</span>
+              <h3 id="recommendation-title">Destrave as costas</h3>
+              <p id="recommendation-description">Uma sequência leve para aliviar a lombar depois de muito tempo sentado.</p>
               <div class="workout-meta">
-                <span>6 min</span>
-                <span>Baixo impacto</span>
+                <span id="recommendation-minutes">6 min</span>
+                <span id="recommendation-reason">Baixo impacto</span>
               </div>
-              <button class="dark-button start-workout" type="button" data-workout="Destrave as costas" data-minutes="6">Começar agora</button>
+              <button class="dark-button start-workout" id="recommendation-button" type="button" data-workout="Destrave as costas" data-minutes="6" data-plan="free">Começar agora</button>
             </div>
           </article>
 
@@ -202,37 +210,48 @@
                 <strong id="report-total">19 min</strong>
               </div>
               <div class="bar-chart" id="activity-chart" aria-label="Gráfico de minutos em movimento por dia"></div>
-              <div class="chart-legend"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div>
+              <div class="chart-legend" id="activity-chart-legend"></div>
             </article>
             <div class="report-summary-grid">
               <article><strong id="report-sessions">3</strong><span>sessões</span></article>
               <article><strong id="report-average">6 min</strong><span>média por sessão</span></article>
             </div>
-            <article class="insight-card"><span class="insight-symbol">↗</span><div><strong>Boa consistência</strong><p>Você se movimentou em 3 dias desta semana. Mais uma pausa supera sua semana anterior.</p></div></article>
+            <article class="insight-card"><span class="insight-symbol" id="activity-insight-symbol">→</span><div><strong id="activity-insight-title">Comece no seu ritmo</strong><p id="activity-insight-text">Conclua seu primeiro treino para acompanhar sua evolução.</p></div></article>
+            <section class="recent-activity">
+              <div class="recent-activity-heading"><h3>Atividades recentes</h3><span id="recent-activity-count"></span></div>
+              <div class="recent-activity-list" id="recent-activity-list"></div>
+            </section>
           </div>
 
           <div class="report-panel" id="report-comfort" data-report-panel="comfort">
+            <form class="comfort-form" id="comfort-form">
+              <div class="comfort-form-heading">
+                <div><span class="eyebrow">Como você está agora?</span><h3>Registrar desconforto</h3></div>
+                <span>0 sem dor · 10 intensa</span>
+              </div>
+              <label><span>Lombar <output id="lower-back-output">0</output></span><input type="range" name="lowerBack" min="0" max="10" value="0"></label>
+              <label><span>Punhos <output id="wrists-output">0</output></span><input type="range" name="wrists" min="0" max="10" value="0"></label>
+              <label><span>Pescoço <output id="neck-output">0</output></span><input type="range" name="neck" min="0" max="10" value="0"></label>
+              <button class="primary-button" type="submit">Salvar avaliação</button>
+            </form>
             <article class="report-card primary-report">
               <div class="report-card-head">
                 <div><span class="eyebrow">Percepção registrada</span><h3>Desconforto corporal</h3></div>
-                <strong class="positive">−32%</strong>
+                <strong class="positive" id="comfort-change">—</strong>
               </div>
-              <div class="line-chart" aria-label="Gráfico de redução do desconforto corporal">
-                <svg viewBox="0 0 320 150" preserveAspectRatio="none" aria-hidden="true">
+              <div class="line-chart" id="comfort-chart" aria-label="Gráfico de desconforto corporal">
+                <svg viewBox="0 0 320 150" preserveAspectRatio="none" aria-hidden="true" id="comfort-chart-svg">
                   <defs><linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bef264" stop-opacity=".32"/><stop offset="1" stop-color="#bef264" stop-opacity="0"/></linearGradient></defs>
                   <path class="grid-line" d="M0 25H320M0 75H320M0 125H320"/>
-                  <path class="area" d="M0 28 C45 31,50 48,92 52 S155 72,184 78 S245 96,320 112 L320 150 L0 150Z"/>
-                  <path class="trend" d="M0 28 C45 31,50 48,92 52 S155 72,184 78 S245 96,320 112"/>
-                  <circle cx="0" cy="28" r="5"/><circle cx="92" cy="52" r="5"/><circle cx="184" cy="78" r="5"/><circle cx="320" cy="112" r="5"/>
+                  <path class="area" id="comfort-area" d=""/>
+                  <path class="trend" id="comfort-trend" d=""/>
+                  <g id="comfort-points"></g>
                 </svg>
+                <p class="chart-empty" id="comfort-empty">Registre uma avaliação para iniciar o gráfico.</p>
               </div>
-              <div class="comfort-scale"><span>Há 4 semanas</span><span>Hoje</span></div>
+              <div class="comfort-scale"><span id="comfort-start-label">Primeiro registro</span><span id="comfort-end-label">Hoje</span></div>
             </article>
-            <div class="body-status-list">
-              <article><span class="body-status-icon">⌁</span><div><strong>Lombar</strong><span>Desconforto leve</span></div><em>−38%</em></article>
-              <article><span class="body-status-icon">◇</span><div><strong>Punhos</strong><span>Sem desconforto</span></div><em>−27%</em></article>
-              <article><span class="body-status-icon">◯</span><div><strong>Pescoço</strong><span>Desconforto moderado</span></div><em>−21%</em></article>
-            </div>
+            <div class="body-status-list" id="body-status-list"></div>
             <div class="premium-report-lock hidden" id="premium-report-lock">
               <span>✦</span><strong>Relatório Premium</strong><p>A análise detalhada de bem-estar está disponível no plano Premium.</p><button type="button" id="upgrade-button">Conhecer Premium</button>
             </div>
@@ -246,18 +265,26 @@
           </div>
           <article class="profile-card">
             <div class="avatar" id="profile-avatar">M</div>
-            <div><h3 id="profile-name">Miguel</h3><span id="profile-plan">Plano gratuito</span></div>
+            <div><h3 id="profile-name">Usuário</h3><span id="profile-email"></span><span id="profile-plan">Plano gratuito</span></div>
           </article>
+          <form class="profile-name-form" id="profile-name-form">
+            <label for="profile-name-input">Nome de exibição</label>
+            <div><input id="profile-name-input" name="name" type="text" maxlength="24" autocomplete="name" required><button type="submit">Salvar</button></div>
+          </form>
+          <form class="profile-plan-form" id="profile-plan-form">
+            <label for="profile-plan-select">Plano da conta</label>
+            <div><select id="profile-plan-select" name="plan"><option value="free">Gratuito</option><option value="premium">Premium</option></select><button type="submit">Alterar</button></div>
+          </form>
           <section class="profile-section">
             <h3>Preferências</h3>
-            <label class="setting-row"><span><strong>Lembrete de pausa</strong><small>A cada 90 minutos</small></span><input type="checkbox" id="reminder-setting" checked><i></i></label>
+            <label class="setting-row"><span><strong>Lembrete de pausa</strong><small>A cada 90 minutos enquanto o app estiver aberto</small></span><input type="checkbox" id="reminder-setting" checked><i></i></label>
             <label class="setting-row"><span><strong>Sons do treino</strong><small>Avisos suaves durante a sessão</small></span><input type="checkbox" id="sound-setting"><i></i></label>
           </section>
           <section class="data-card">
             <span class="stat-icon blue"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 3h8v4H8zM8 12h8M8 16h5"/></svg></span>
-            <div><strong>Dados persistidos</strong><p>Nome, plano, preferências e treinos concluídos são salvos localmente.</p></div>
+            <div><strong>Dados persistidos</strong><p>Conta, plano, preferências e progresso são vinculados ao usuário no MongoDB.</p></div>
           </section>
-          <button class="secondary-button" id="clear-data-button" type="button">Limpar meus dados</button>
+          <button class="secondary-button" id="clear-data-button" type="button">Limpar histórico de progresso</button>
         </section>
       </div>
 
